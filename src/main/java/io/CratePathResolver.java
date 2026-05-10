@@ -6,6 +6,10 @@ import main.java.util.SeratoPathUtils;
 import java.nio.file.Path;
 import java.util.StringJoiner;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class CratePathResolver {
 
     /**

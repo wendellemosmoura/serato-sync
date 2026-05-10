@@ -8,6 +8,10 @@ import main.java.util.SeratoPathUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class ConfigService {
 
     private final ConfigRepository repository = new ConfigRepository();
@@ -25,7 +29,14 @@ public class ConfigService {
         this.config = loaded;
     }
 
-    public AppConfig getConfig() { return config; }
+    public AppConfig getConfig() {
+        return config;
+    }
+
+    public void setDarkMode(boolean dark) {
+        config.setDarkMode(dark);
+        persist();
+    }
 
     public void addFolder(SyncFolder folder) {
         config.addFolder(folder);

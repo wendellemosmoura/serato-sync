@@ -5,12 +5,18 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import main.java.ui.MainController;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
         MainController controller = new MainController();
         Scene scene = new Scene(controller.build(primaryStage), 560, 540);
+
+        controller.applyInitialTheme(scene);
 
         primaryStage.setTitle("serato-sync");
         primaryStage.setScene(scene);

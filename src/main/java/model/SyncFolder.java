@@ -3,16 +3,29 @@ package main.java.model;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class SyncFolder {
     private final Path path;
 
-    public SyncFolder(Path path) { this.path = path; }
-    public SyncFolder(String path) { this.path = Paths.get(path); }
+    public SyncFolder(Path path) {
+        this.path = path;
+    }
 
-    public Path getPath()         { return path; }
+    public SyncFolder(String path) {
+        this.path = Paths.get(path);
+    }
+
+    public Path getPath() {
+        return path;
+    }
 
     @Override
-    public String toString()      { return path.toString(); }
+    public String toString() {
+        return path.toString();
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -22,5 +35,7 @@ public class SyncFolder {
     }
 
     @Override
-    public int hashCode() { return path.hashCode(); }
+    public int hashCode() {
+        return path.hashCode();
+    }
 }

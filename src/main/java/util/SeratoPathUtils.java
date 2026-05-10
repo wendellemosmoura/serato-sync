@@ -4,10 +4,14 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class SeratoPathUtils {
 
     private static final String SERATO_DIR = "_Serato_";
-    private static final String SUBCRATES  = "Subcrates";
+    private static final String SUBCRATES = "Subcrates";
 
     /**
      * Automatically detects the system's default _Serato_ folder.

@@ -3,6 +3,10 @@ package main.java.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class Crate {
     private String name;
     private List<String> tracks = new ArrayList<>();
