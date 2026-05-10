@@ -4,6 +4,12 @@ A Java desktop application that automatically synchronizes your music folder str
 
 ---
 
+## Screenshot
+
+![serato-sync](assets/screenshot.png)
+
+---
+
 ## Inspiration
 
 This project was inspired by serato-itch-sync by **Roman Alekseenkov**, a pioneering open-source tool that first explored the idea of mapping directory structures directly to Serato crates using Java.
