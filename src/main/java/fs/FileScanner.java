@@ -8,8 +8,13 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class FileScanner {
     private static final Set<String> AUDIO_EXTENSIONS;
+
     static {
         Set<String> s = new HashSet<>(Arrays.asList(
                 "mp3", "wl.mp3", "flac", "aif", "aiff", "wav", "ogg", "m4a", "aac", "wma", "alac", "mp4", "mov", "avi"
@@ -22,7 +27,7 @@ public class FileScanner {
      *
      * @param rootFolder user added folder
      * @return sorted map of [folder] → [list of absolute track paths]
-     *         Only folders that contain at least one audio track are included.
+     * Only folders that contain at least one audio track are included.
      */
     public Map<Path, List<Path>> scan(Path rootFolder) throws IOException {
         Map<Path, List<Path>> result = new LinkedHashMap<>();

@@ -7,6 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class CrateWriter {
 
     public void write(Crate crate, File file) throws IOException {

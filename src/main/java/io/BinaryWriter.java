@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class BinaryWriter implements AutoCloseable {
     private OutputStream out;
 

@@ -19,20 +19,18 @@ import main.java.service.LibrarySyncService;
 import java.io.File;
 import java.nio.file.Paths;
 
-
-
+/**
+ * @author Wendel Lemos Moura
+ */
 public class MainController {
 
     private final ConfigService configService = new ConfigService();
-    private final LibrarySyncService syncService   = new LibrarySyncService();
+    private final LibrarySyncService syncService = new LibrarySyncService();
 
     private ObservableList<SyncFolder> folders;
     private Label statusLabel;
     private Button syncButton;
-    private Scene scene;
-
     private boolean darkMode = false;
-
 
     // ─── entry point ────────────────────────────────────────────────────
 
@@ -49,28 +47,39 @@ public class MainController {
         return root;
     }
 
+    public void applyInitialTheme(Scene scene) {
+        if (configService.getConfig().isDarkMode()) {
+            scene.getStylesheets().add(
+                    getClass().getResource("/dark.css").toExternalForm()
+            );
+        }
+    }
+
     // ─── header ───────────────────────────────────────────────────────────
 
     private HBox buildHeader(Stage stage) {
         Label title = new Label("serato-sync");
         title.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
 
-        Hyperlink version = new Hyperlink("v1.0");
+        Hyperlink version = new Hyperlink(readAppVersion());
         version.setStyle("-fx-font-size: 12px; -fx-opacity: 0.7;");
         version.setOnAction(e -> {
             try {
                 java.awt.Desktop.getDesktop().browse(
-                        new java.net.URI("https://github.com/wendellemosmoura")
+                        new java.net.URI("https://github.com/wendellemosmoura/serato-sync/releases")
                 );
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
 
-        Button themeBtn = new Button("Dark");
+        darkMode = configService.getConfig().isDarkMode();
+        Button themeBtn = new Button(darkMode ? "Light" : "Dark");
         themeBtn.setStyle("-fx-font-size: 11px; -fx-padding: 3 8 3 8;");
+
         themeBtn.setOnAction(e -> {
             darkMode = !darkMode;
+            configService.setDarkMode(darkMode);
             Scene s = stage.getScene();
             if (darkMode) {
                 s.getStylesheets().add(
@@ -91,6 +100,16 @@ public class MainController {
         header.setPadding(new Insets(14, 20, 14, 20));
         header.setStyle("-fx-border-color: -fx-box-border; -fx-border-width: 0 0 1 0;");
         return header;
+    }
+
+    private String readAppVersion() {
+        try {
+            java.util.Properties props = new java.util.Properties();
+            props.load(getClass().getResourceAsStream("/version.properties"));
+            return "v" + props.getProperty("app.version", "?.?.?");
+        } catch (Exception e) {
+            return "v?.?.?";
+        }
     }
 
     // ─── body ───────────────────────────────────────────────────────────────
@@ -133,9 +152,9 @@ public class MainController {
 
         Button addBtn = new Button("Add");
         addBtn.setId("addButton");
-        addBtn.setDefaultButton(true); // responde ao Enter
+        addBtn.setDefaultButton(true);
         addBtn.setOnAction(e -> addFolder(input));
-        input.setOnAction(e -> addFolder(input)); // Enter no campo também adiciona
+        input.setOnAction(e -> addFolder(input));
 
         HBox row = new HBox(8, input, browseBtn, addBtn);
         row.setAlignment(Pos.CENTER_LEFT);
@@ -168,9 +187,9 @@ public class MainController {
         list.setPlaceholder(new Label("No folders added yet."));
 
         list.setCellFactory(lv -> new ListCell<SyncFolder>() {
-            private final Label  pathLabel = new Label();
+            private final Label pathLabel = new Label();
             private final Button deleteBtn = new Button("×");
-            private final HBox   row       = new HBox(8, pathLabel, deleteBtn);
+            private final HBox row = new HBox(8, pathLabel, deleteBtn);
 
             {
                 HBox.setHgrow(pathLabel, Priority.ALWAYS);
@@ -290,13 +309,13 @@ public class MainController {
 
         task.setOnFailed(e -> {
             Throwable ex = task.getException();
-            showStatus("Erro: " + (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()), false);
+            showStatus("Error: " + (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()), false);
             syncButton.setDisable(false);
             ex.printStackTrace();
         });
 
         Thread thread = new Thread(task);
-        thread.setDaemon(true); // encerra com a janela sem bloquear o sistema
+        thread.setDaemon(true);
         thread.start();
     }
 

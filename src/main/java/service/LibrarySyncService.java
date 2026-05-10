@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class LibrarySyncService {
 
     private final FileScanner scanner  = new FileScanner();

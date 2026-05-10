@@ -11,11 +11,16 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * @author Wendel Lemos Moura
+ */
+
 public class ConfigRepository {
 
     private static final String CONFIG_DIR  = ".serato-sync";
     private static final String CONFIG_FILE = "config.properties";
 
+    private static final String KEY_DARK_MODE = "ui.dark.mode";
     private static final String KEY_SERATO_PATH   = "serato.library.path";
     private static final String KEY_FOLDERS_COUNT = "sync.folders.count";
     private static final String KEY_FOLDER_PREFIX = "sync.folder.";
@@ -31,6 +36,8 @@ public class ConfigRepository {
         Files.createDirectories(configFilePath.getParent());
 
         Properties props = new Properties();
+
+        props.setProperty(KEY_DARK_MODE, String.valueOf(config.isDarkMode()));
 
         if (config.getSeratoLibraryPath() != null) {
             props.setProperty(KEY_SERATO_PATH, config.getSeratoLibraryPath().toString());
@@ -50,7 +57,6 @@ public class ConfigRepository {
     public AppConfig load() throws IOException {
         AppConfig config = new AppConfig();
 
-        // Se não existe, retorna config com valores padrão detectados
         if (!Files.exists(configFilePath)) {
             config.setSeratoLibraryPath(SeratoPathUtils.detectSeratoLibraryPath());
             return config;
@@ -60,6 +66,8 @@ public class ConfigRepository {
         try (InputStream in = new FileInputStream(configFilePath.toFile())) {
             props.load(in);
         }
+
+        config.setDarkMode(Boolean.parseBoolean(props.getProperty(KEY_DARK_MODE, "false")));
 
         String seratoPath = props.getProperty(KEY_SERATO_PATH);
         config.setSeratoLibraryPath(
