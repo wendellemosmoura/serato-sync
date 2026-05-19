@@ -53,13 +53,15 @@ Electronic > Techno > Industrial
 
 - Recursive folder scanning with automatic subcrate hierarchy
 - Supports multiple root folders simultaneously
-- Persistent configuration added folders are remembered between sessions
+- **Playlist import** — import `.m3u`, `.m3u8` and `.wpl` files directly as Serato crates
+- Persistent configuration — added folders and playlists are remembered between sessions
 - Auto-detection of the Serato library path (`_Serato_`) on Windows and macOS
 - Manual override of the Serato library path via Browse dialog
-- Dark mode toggle
+- Right-click any folder or playlist to reveal it in Windows Explorer or macOS Finder
+- Dark mode toggle with preference saved between sessions
 - Supports the following audio formats: `mp3`, `wl.mp3`, `flac`, `aif`, `aiff`, `wav`, `ogg`, `m4a`, `aac`, `wma`, `alac`
 - Supports the following video formats: `mp4`, `mov`, `avi`
-- Single `.jar` file no installation required
+- Single `.jar` file — no installation required
 - Runs on Windows and macOS
 
 ---
@@ -174,14 +176,39 @@ Each drive requires a separate sync operation pointing to its own library.
 
 ---
 
+## Importing playlists
+
+serato-sync can import playlist files directly as Serato crates. The crate name is derived from the playlist filename — for example, `HighEnergy.m3u` becomes a crate named `HighEnergy`.
+
+### Supported formats
+
+| Format | Extension | Notes |
+|---|---|---|
+| M3U | `.m3u` | Standard playlist format, compatible with most media players. Encoding auto-detected (UTF-8 or Windows-1252) |
+| M3U8 | `.m3u8` | UTF-8 variant of M3U, as defined by the specification |
+| WPL | `.wpl` | Windows Media Player playlist format |
+
+### How to import
+
+1. Under **Playlists to import**, click **Browse** or type the path to a playlist file and click **Add**
+2. Repeat for as many playlists as needed
+3. Confirm the Serato library path and click **Sync library**
+
+The imported playlists will appear as crates alongside any folder-based crates.
+
+> **Note:** Serato DJ Pro does not preserve the original playlist order when loading externally created crates. Tracks will appear sorted alphabetically inside the crate, regardless of the order defined in the playlist file. This is a Serato limitation and cannot be controlled by serato-sync.
+
+---
+
 ## How to use
 
 1. Launch the application with `java -jar serato-sync.jar`
-2. Click **Browse** or type a folder path and click **Add** to add a music folder
-3. Repeat for as many folders as you want to sync
-4. Confirm the detected Serato library path is correct (or browse to set it manually)
-5. Click **Sync library**
-6. Open Serato DJ Pro, your crates will be ready
+2. Under **Folders to sync**, click **Browse** or type a folder path and click **Add**
+3. Optionally, under **Playlists to import**, add any `.m3u`, `.m3u8` or `.wpl` files
+4. Repeat for as many folders or playlists as you want to sync
+5. Confirm the detected Serato library path is correct (or browse to set it manually)
+6. Click **Sync library**
+7. Open Serato DJ Pro — your crates will be ready
 
 > **Note:** serato-sync writes the crate structure and track paths. Metadata such as BPM, key, artist, and duration is read by Serato directly from your audio files. If tags appear empty after syncing, select all tracks in the crate inside Serato and choose **Analyze Files** to populate them.
 
