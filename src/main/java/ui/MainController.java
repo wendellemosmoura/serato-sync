@@ -13,8 +13,11 @@ import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import main.java.model.SyncFolder;
+import main.java.model.SyncPlaylist;
+import main.java.parser.PlaylistParserFactory;
 import main.java.service.ConfigService;
 import main.java.service.LibrarySyncService;
+import main.java.util.OsUtils;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -22,12 +25,14 @@ import java.nio.file.Paths;
 /**
  * @author Wendel Lemos Moura
  */
+
 public class MainController {
 
     private final ConfigService configService = new ConfigService();
     private final LibrarySyncService syncService = new LibrarySyncService();
 
     private ObservableList<SyncFolder> folders;
+    private ObservableList<SyncPlaylist> playlists;
     private Label statusLabel;
     private Button syncButton;
     private boolean darkMode = false;
@@ -37,6 +42,10 @@ public class MainController {
     public Parent build(Stage stage) {
         folders = FXCollections.observableArrayList(
                 configService.getConfig().getSyncFolders()
+        );
+
+        playlists = FXCollections.observableArrayList(
+                configService.getConfig().getSyncPlaylists()
         );
 
         VBox root = new VBox();
@@ -119,6 +128,7 @@ public class MainController {
         body.setPadding(new Insets(20));
         body.getChildren().addAll(
                 buildFolderSection(stage),
+                buildPlaylistSection(stage),
                 buildSeratoPathSection(stage),
                 new Separator(),
                 buildSyncSection()
@@ -210,6 +220,18 @@ public class MainController {
                         showStatus("Folder removed.", true);
                     }
                 });
+                ContextMenu contextMenu = new ContextMenu();
+                MenuItem revealItem = new MenuItem("Reveal in Explorer");
+                if (OsUtils.isMac()) revealItem.setText("Reveal in Finder");
+                revealItem.setOnAction(e -> {
+                    SyncFolder item = getItem();
+                    if (item != null) revealInFileManager(item.getPath().toFile());
+                });
+
+                contextMenu.getItems().add(revealItem);
+                row.setOnContextMenuRequested(e ->
+                        contextMenu.show(row, e.getScreenX(), e.getScreenY())
+                );
 
                 row.setAlignment(Pos.CENTER_LEFT);
                 row.setPadding(new Insets(2, 4, 2, 8));
@@ -222,6 +244,129 @@ public class MainController {
                     setGraphic(null);
                 } else {
                     pathLabel.setText(item.toString());
+                    setGraphic(row);
+                }
+            }
+        });
+
+        return list;
+    }
+
+    // ─── playlists section ─────────────────────────────────────────────────────
+
+    private VBox buildPlaylistSection(Stage stage) {
+        Label sectionLabel = new Label("Playlists to import");
+        sectionLabel.setStyle("-fx-font-size: 12px; -fx-opacity: 0.6;");
+
+        return new VBox(8, sectionLabel, buildPlaylistInputRow(stage), buildPlaylistList());
+    }
+
+    private HBox buildPlaylistInputRow(Stage stage) {
+        TextField input = new TextField();
+        input.setPromptText(".m3u or .wpl file...");
+        input.setStyle("-fx-font-size: 13px;");
+        HBox.setHgrow(input, Priority.ALWAYS);
+
+        Button browseBtn = new Button("Browse");
+        browseBtn.setOnAction(e -> {
+            javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
+            chooser.setTitle("Select playlist file");
+            chooser.getExtensionFilters().add(
+                    new javafx.stage.FileChooser.ExtensionFilter(
+                            "Playlist files", "*.m3u", "*.m3u8", "*.wpl"
+                    )
+            );
+            File file = chooser.showOpenDialog(stage);
+            if (file != null) input.setText(file.getAbsolutePath());
+        });
+
+        Button addBtn = new Button("Add");
+        addBtn.setOnAction(e -> addPlaylist(input));
+        input.setOnAction(e -> addPlaylist(input));
+
+        HBox row = new HBox(8, input, browseBtn, addBtn);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
+    }
+
+    private void addPlaylist(TextField input) {
+        String path = input.getText().trim();
+        if (path.isEmpty()) return;
+
+        File file = new File(path);
+        if (!file.exists() || !file.isFile()) {
+            showStatus("File not found: " + path, false);
+            return;
+        }
+        if (!PlaylistParserFactory.isSupported(file)) {
+            showStatus("Unsupported format. Use .m3u, .m3u8 or .wpl", false);
+            return;
+        }
+
+        SyncPlaylist playlist = new SyncPlaylist(file);
+        if (!playlists.contains(playlist)) {
+            playlists.add(playlist);
+            configService.addPlaylist(playlist);
+        }
+        input.clear();
+        showStatus("Playlist added.", true);
+    }
+
+    private ListView<SyncPlaylist> buildPlaylistList() {
+        ListView<SyncPlaylist> list = new ListView<>(playlists);
+        list.setPrefHeight(120);
+        list.setStyle("-fx-font-size: 13px;");
+        list.setPlaceholder(new Label("No playlists added yet."));
+
+        list.setCellFactory(lv -> new ListCell<SyncPlaylist>() {
+            private final Label  nameLabel = new Label();
+            private final Button deleteBtn = new Button("×");
+            private final HBox   row       = new HBox(8, nameLabel, deleteBtn);
+
+            {
+                HBox.setHgrow(nameLabel, Priority.ALWAYS);
+                nameLabel.setMaxWidth(Double.MAX_VALUE);
+
+                deleteBtn.setStyle(
+                        "-fx-background-color: transparent;" +
+                                "-fx-text-fill: #cc4444;" +
+                                "-fx-font-size: 16px;" +
+                                "-fx-cursor: hand;" +
+                                "-fx-padding: 0 4 2 4;"
+                );
+                deleteBtn.setOnAction(e -> {
+                    SyncPlaylist item = getItem();
+                    if (item != null) {
+                        playlists.remove(item);
+                        configService.removePlaylist(item);
+                        showStatus("Playlist removed.", true);
+                    }
+                });
+                ContextMenu contextMenu = new ContextMenu();
+                MenuItem revealItem = new MenuItem("Reveal in Explorer");
+                if (OsUtils.isMac()) revealItem.setText("Reveal in Finder");
+
+                revealItem.setOnAction(e -> {
+                    SyncPlaylist item = getItem();
+                    if (item != null) revealInFileManager(item.getFile());
+                });
+
+                contextMenu.getItems().add(revealItem);
+                row.setOnContextMenuRequested(e ->
+                        contextMenu.show(row, e.getScreenX(), e.getScreenY())
+                );
+
+                row.setAlignment(Pos.CENTER_LEFT);
+                row.setPadding(new Insets(2, 4, 2, 8));
+            }
+
+            @Override
+            protected void updateItem(SyncPlaylist item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    nameLabel.setText(item.getName()); // exibe só o nome do arquivo, não o path todo
                     setGraphic(row);
                 }
             }
@@ -281,7 +426,7 @@ public class MainController {
 
     private void startSync() {
         if (folders.isEmpty()) {
-            showStatus("Add at least one folder before syncing.", false);
+            showStatus("Add at least one folder or playlist before syncing.", false);
             return;
         }
 
@@ -328,5 +473,20 @@ public class MainController {
                 "-fx-font-size: 12px; -fx-text-fill: " +
                         (isSuccess ? "#1D9E75" : "#D85A30") + ";"
         );
+    }
+
+    // ─── reveal in file manager utility ─────────────────────────────────────────────────
+
+    private void revealInFileManager(File target) {
+        try {
+            java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
+            if (target.isDirectory()) {
+                desktop.open(target);
+            } else {
+                desktop.open(target.getParentFile());
+            }
+        } catch (Exception ex) {
+            showStatus("Could not open file manager.", false);
+        }
     }
 }

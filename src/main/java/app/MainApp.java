@@ -14,7 +14,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         MainController controller = new MainController();
-        Scene scene = new Scene(controller.build(primaryStage), 560, 540);
+        Scene scene = new Scene(controller.build(primaryStage), 560, 660);
 
         controller.applyInitialTheme(scene);
 

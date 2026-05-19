@@ -3,6 +3,7 @@ package main.java.service;
 import main.java.io.ConfigRepository;
 import main.java.model.AppConfig;
 import main.java.model.SyncFolder;
+import main.java.model.SyncPlaylist;
 import main.java.util.SeratoPathUtils;
 
 import java.io.IOException;
@@ -45,6 +46,16 @@ public class ConfigService {
 
     public void removeFolder(SyncFolder folder) {
         config.removeFolder(folder);
+        persist();
+    }
+
+    public void addPlaylist(SyncPlaylist playlist) {
+        config.addPlaylist(playlist);
+        persist();
+    }
+
+    public void removePlaylist(SyncPlaylist playlist) {
+        config.removePlaylist(playlist);
         persist();
     }
 
